@@ -1,5 +1,9 @@
 package observatory
 
+case class StationsLines(stnIdentifier: String, wbanIdentifier: String, lat: Double, lon: Double)
+case class TemperatureLines(stnIdentifier: String, wbanIdentifier: String,
+                            year: Year, month: Int, day: Int, temperature: Double)
+
 /**
   * Introduced in Week 1. Represents a location on the globe.
   * @param lat Degrees of latitude, -90 ≤ lat ≤ 90

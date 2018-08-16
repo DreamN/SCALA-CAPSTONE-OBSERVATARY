@@ -9,6 +9,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.functions._
 
 
 /**
@@ -51,7 +52,7 @@ object Extraction {
       line.head, line(1), year.toInt,
       getResultOrNull(line(2), _.toInt),
       getResultOrNull(line(3), _.toInt),
-      getResultOrNull(line(4), _.toDouble)
+      getResultOrNull(line(4), x => (x.toDouble - 32.0) * (5.0/9.0))
     ))
     spark.sparkContext.textFile(fsPath(temperatureFile))
       .map(_.split(",", -1).to[List])
@@ -125,7 +126,39 @@ object Extraction {
     * @return A sequence containing, for each location, the average temperature over the year.
     */
   def locationYearlyAverageRecords(records: Iterable[(LocalDate, Location, Temperature)]): Iterable[(Location, Temperature)] = {
-    ???
+
+    import spark.implicits._
+
+    def avgIterable[T](iterable: Iterable[T], fn: T => Double) : Double = {
+      val (sum, length): (Double, Int) = iterable.foldLeft((0.0, 0))((t, r) => (t._1 + fn(r), t._2 + 1))
+      (sum/length)
+    }
+
+    def row(line: (LocalDate, Location, Temperature)): Row = Row.fromSeq(Seq(
+      line._2.lat,
+      line._2.lon,
+      line._3.toDouble
+    ))
+
+    val schema: StructType = StructType(
+      List(
+        StructField("lat", DoubleType, nullable = true),
+        StructField("lon", DoubleType, nullable = true),
+        StructField("temperature", DoubleType, nullable = true)
+      )
+    )
+
+    val rdd : RDD[Row] = spark.sparkContext.makeRDD(records.toSeq).map(row)
+    val df : DataFrame = spark.createDataFrame(rdd, schema)
+
+    df
+      .groupBy("lat", "lon")
+      .agg(avg("temperature").as("avgTemperature"))
+      .select("lat", "lon", "avgTemperature")
+      .rdd.map(r => (
+      Location(r(0).toString.toDouble, r(1).toString.toDouble),
+      r(2).toString.toDouble
+    )).collect().toIterable
   }
 
 }

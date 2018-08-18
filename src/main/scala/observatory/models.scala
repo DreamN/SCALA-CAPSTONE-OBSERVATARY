@@ -1,5 +1,7 @@
 package observatory
 
+import scala.math._
+
 case class StationsLines(stnIdentifier: String, wbanIdentifier: String, lat: Double, lon: Double)
 case class TemperatureLines(stnIdentifier: String, wbanIdentifier: String,
                             year: Year, month: Int, day: Int, temperature: Double)
@@ -9,7 +11,29 @@ case class TemperatureLines(stnIdentifier: String, wbanIdentifier: String,
   * @param lat Degrees of latitude, -90 ≤ lat ≤ 90
   * @param lon Degrees of longitude, -180 ≤ lon ≤ 180
   */
-case class Location(lat: Double, lon: Double)
+case class Location(lat: Double, lon: Double){
+  def isAntipodes(that: Location): Boolean = {
+    this.lon == - that.lon && this.lat == - that.lat
+  }
+  def dist(that: Location): Double = {
+    //sqrt(pow(a.lat - b.lat, 2) + pow(a.lon - b.lon, 2))
+    //FIXME: Replace with Great_Circle_Distance
+    //Phi is latitude in radians
+    //Lambda is longitude in radians
+    val deltaAngle: Double ={
+      if(this.equals(that)) 0
+      else if(this.isAntipodes(that)) Pi
+      else {
+        val(φA, λA) = (toRadians(this.lat), toRadians(this.lon))
+        val(φB, λB) = (toRadians(that.lat), toRadians(that.lon))
+        val eq = sin(φA) * sin(φB) + cos(φA) * cos(φB) * cos(abs(λA - λB))
+        acos(eq)
+      }
+    }
+    val d = 6371.0 * deltaAngle
+    d
+  }
+}
 
 /**
   * Introduced in Week 3. Represents a tiled web map tile.

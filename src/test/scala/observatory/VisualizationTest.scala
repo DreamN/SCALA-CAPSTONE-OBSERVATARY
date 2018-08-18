@@ -24,7 +24,7 @@ trait VisualizationTest extends FunSuite with Checkers {
 //  println(Visualization.interpolateColor(points, 15))
 //  println(Visualization.interpolateColor(points, -20))
 //  println(Visualization.interpolateColor(points, 0))
-  val tempData: Iterable[(LocalDate, Location, Temperature)] = Extraction.locateTemperatures(2000, "/stations.csv", "/2000.csv")
+  val tempData: Iterable[(LocalDate, Location, Temperature)] = Extraction.locateTemperatures(2006, "/stations.csv", "/2006.csv")
   val yearlyAvgTemp: Iterable[(Location, Temperature)] = Extraction.locationYearlyAverageRecords(tempData)
   val tempX = Visualization.predictTemperature(yearlyAvgTemp, Location(55.23, 23.45))
   val colorX = Visualization.interpolateColor(points, tempX)

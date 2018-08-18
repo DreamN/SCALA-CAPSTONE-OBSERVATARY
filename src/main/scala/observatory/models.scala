@@ -17,7 +17,7 @@ case class Location(lat: Double, lon: Double){
   }
   def dist(that: Location): Double = {
     //sqrt(pow(a.lat - b.lat, 2) + pow(a.lon - b.lon, 2))
-    //FIXME: Replace with Great_Circle_Distance
+    //Todo: Great_Circle_Distance
     //Phi is latitude in radians
     //Lambda is longitude in radians
     val deltaAngle: Double ={
@@ -26,8 +26,7 @@ case class Location(lat: Double, lon: Double){
       else {
         val(φA, λA) = (toRadians(this.lat), toRadians(this.lon))
         val(φB, λB) = (toRadians(that.lat), toRadians(that.lon))
-        val eq = sin(φA) * sin(φB) + cos(φA) * cos(φB) * cos(abs(λA - λB))
-        acos(eq)
+        acos(sin(φA) * sin(φB) + cos(φA) * cos(φB) * cos(abs(λA - λB)))
       }
     }
     val d = 6371.0 * deltaAngle

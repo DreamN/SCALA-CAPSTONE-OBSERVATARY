@@ -16,8 +16,7 @@ case class Location(lat: Double, lon: Double){
     this.lon == - that.lon && this.lat == - that.lat
   }
   def dist(that: Location): Double = {
-    //sqrt(pow(a.lat - b.lat, 2) + pow(a.lon - b.lon, 2))
-    //Todo: Great_Circle_Distance
+    //Great_Circle_Distance
     //Phi is latitude in radians
     //Lambda is longitude in radians
     val deltaAngle: Double ={

@@ -8,7 +8,7 @@ import math._
   */
 object Visualization {
 
-  val P = 20
+  val P = 6
   /**
     * @param temperatures Known temperatures: pairs containing a location and the temperature at this location
     * @param location Location where to predict the temperature
@@ -68,15 +68,17 @@ object Visualization {
     * @return A 360×180 image where each pixel shows the predicted temperature at its location
     */
   def visualize(temperatures: Iterable[(Location, Temperature)], colors: Iterable[(Temperature, Color)]): Image = {
-    val pixels = (for {
+    val coordinates = for {
       lat <- 90 to -89 by -1//90 to -89
       lon <- -180 to 179//-180 to 179
-    }
-    yield {
-      val temp = predictTemperature(temperatures, Location(lat, lon))
-      val color = interpolateColor(colors, temp)
-      Pixel(color.red, color.green, color.blue, 255)
-    }).toArray
+    } yield (lat, lon)
+    val pixels = coordinates.par.map{
+      case (lat, lon) => {
+        val temp = predictTemperature(temperatures, Location(lat, lon))
+        val color = interpolateColor(colors, temp)
+        Pixel(color.red, color.green, color.blue, 255)
+      }
+    }.toArray
     Image(360, 180, pixels)
   }
 }
